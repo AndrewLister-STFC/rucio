@@ -49,6 +49,7 @@ from dogpile.cache.api import NoValue
 from sqlalchemy.exc import DatabaseError
 
 from rucio.common.config import config_get
+from rucio.common.types import InternalAccount
 from rucio.common.utils import chunks
 from rucio.common.exception import DatabaseException, ConfigNotFound, UnsupportedOperation, ReplicaNotFound, RequestNotFound
 from rucio.core import request as request_core, heartbeat, replica as replica_core
@@ -350,7 +351,7 @@ def __check_suspicious_files(req, suspicious_patterns):
                     pfns.append(url['url'])
                 if pfns:
                     logging.debug("Found suspicious urls: %s", str(pfns))
-                    replica_core.declare_bad_file_replicas(pfns, reason=reason, issuer='root', status=BadFilesStatus.SUSPICIOUS)
+                    replica_core.declare_bad_file_replicas(pfns, reason=reason, issuer=InternalAccount('root', req['scope'].vo), status=BadFilesStatus.SUSPICIOUS)
     except Exception as error:
         logging.warning("Failed to check suspicious file with request: %s - %s", req['request_id'], str(error))
     return is_suspicious
@@ -443,7 +444,7 @@ def __update_replica(replica, session=None):
                                          replica['name'],
                                          replica['bytes'],
                                          pfn=replica['pfn'] if 'pfn' in replica else None,
-                                         account='root',  # it will deleted immediately, do we need to get the accurate account from rule?
+                                         account=InternalAccount('root', replica['scope'].vo),  # it will deleted immediately, do we need to get the accurate account from rule?
                                          adler32=replica['adler32'],
                                          tombstone=datetime.datetime.utcnow(),
                                          session=session)
