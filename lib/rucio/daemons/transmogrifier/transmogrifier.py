@@ -121,10 +121,20 @@ def is_matching_subscription(subscription, did, metadata):
         elif key == 'scope':
             match_scope = False
             for scope in values:
-                if re.match(scope, did['scope'].external):
+                if re.match(scope, did['scope'].internal):
                     match_scope = True
                     break
             if not match_scope:
+                return False
+        elif key == 'account':
+            match_account = False
+            if not isinstance(values, list):
+                values = [values]
+            for account in values:
+                if account == metadata['account'].internal:
+                    match_account = True
+                    break
+            if not match_account:
                 return False
         else:
             if not isinstance(values, list):
@@ -310,8 +320,12 @@ def transmogrifier(bulk=5, once=False, sleep_time=60):
                                                 if not skip_rule_creation:
                                                     for rse in selected_rses:
                                                         logging.info(prepend_str + 'Will insert one rule for %s:%s on %s' % (did['scope'], did['name'], rse))
+                                                        if did['scope'].vo != 'def':
+                                                            rse_str = 'vo={}&({})'.format(did['scope'].vo, rse)
+                                                        else:
+                                                            rse_str = rse
                                                         add_rule(dids=[{'scope': did['scope'], 'name': did['name']}], account=account, copies=1,
-                                                                 rse_expression=rse, grouping=grouping, weight=weight, lifetime=lifetime, locked=locked,
+                                                                 rse_expression=rse_str, grouping=grouping, weight=weight, lifetime=lifetime, locked=locked,
                                                                  subscription_id=subscription_id, source_replica_expression=source_replica_expression, activity=activity,
                                                                  purge_replicas=purge_replicas, ignore_availability=ignore_availability, comment=comment)
 

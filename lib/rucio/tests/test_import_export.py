@@ -366,21 +366,23 @@ class TestExporter(object):
     def setup(self):
         if config_get_bool('common', 'multi_vo', raise_exception=False, default=False):
             self.vo_header = {'X-Rucio-VO': 'tst'}
+            self.vo = {'vo': 'tst'}
         else:
             self.vo_header = {}
+            self.vo = {}
 
     def test_export_core(self):
         """ EXPORT (CORE): Test the export of data."""
-        data = export_data()
-        assert_equal(data['rses'], export_rses())
-        assert_equal(data['distances'], export_distances())
+        data = export_data(**self.vo)
+        assert_equal(data['rses'], export_rses(**self.vo))
+        assert_equal(data['distances'], export_distances(**self.vo))
 
     def test_export_client(self):
         """ EXPORT (CLIENT): Test the export of data."""
         export_client = ExportClient()
         data = export_client.export_data()
         rses = {}
-        for rse in list_rses():
+        for rse in list_rses(filters=self.vo):
             rse_name = rse['rse']
             rse_id = rse['id']
             rses[rse_name] = export_rse(rse_id=rse_id)
@@ -397,14 +399,23 @@ class TestExporter(object):
         headers2 = {'X-Rucio-Type': 'user', 'X-Rucio-Account': 'root', 'X-Rucio-Auth-Token': str(token)}
 
         r2 = TestApp(export_app.wsgifunc(*mw)).get('/', headers=headers2, expect_errors=True)
-        rses = export_rses()
+        rses = export_rses(**self.vo)
         sanitised = {}
         for rse_id in rses:
             sanitised[get_rse_name(rse_id=rse_id)] = rses[rse_id]
         rses = sanitised
 
+        distances = export_distances()
+        sanitised = {}
+        for src_id in distances:
+            tmp = {}
+            for dst_id in distances[src_id]:
+                tmp[get_rse_name(rse_id=dst_id)] = distances[src_id][dst_id]
+            sanitised[get_rse_name(rse_id=src_id)] = tmp
+        distances = sanitised
+
         assert_equal(r2.status, 200)
-        assert_equal(json.loads(r2.body), json.loads(render_json(**{'rses': rses, 'distances': export_distances()})))
+        assert_equal(json.loads(r2.body), json.loads(render_json(**{'rses': rses, 'distances': distances})))
 
 
 class TestExportImport(object):

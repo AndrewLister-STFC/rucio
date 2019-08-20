@@ -952,3 +952,13 @@ class DuplicateFileTransferSubmission(RucioException):
         super(DuplicateFileTransferSubmission, self).__init__(*args, **kwargs)
         self._message = 'One or more files are already submitted to the transfer tool'
         self.error_code = 90
+
+
+class VONotFound(RucioException):
+    """
+    Requested VO does not exist.
+    """
+    def __init__(self, *args, **kwargs):
+        super(VONotFound, self).__init__(*args, **kwargs)
+        self.message = 'The requested VO does not exist'
+        self.error_code = 91

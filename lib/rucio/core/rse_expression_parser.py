@@ -40,7 +40,7 @@ PATTERN = r'^%s(%s|%s|%s)*' % (PRIMITIVE, UNION, INTERSECTION, COMPLEMENT)
 
 
 REGION = make_region().configure('dogpile.cache.memcached',
-                                 expiration_time=3600,
+                                 expiration_time=0,
                                  arguments={'url': "127.0.0.1:11211", 'distributed_lock': True})
 
 
@@ -71,7 +71,6 @@ def parse_expression(expression, filter=None, session=None):
             raise InvalidRSEExpression('Problem with parantheses.')
 
         # Check the expression pattern
-        print(expression)
         match = re.match(PATTERN, expression)
         if match is None:
             raise InvalidRSEExpression('Expression does not comply to RSE Expression syntax')

@@ -54,8 +54,8 @@ class TestThrottlerGroupedFIFO(object):
 
     def setUp(self):
         self.db_session.query(models.Request).delete()
-        remove_option('throttler', '%s,%s' % (self.user_activity, self.dest_rse), session=self.db_session)
-        remove_option('throttler', '%s,%s' % (self.all_activities, self.dest_rse), session=self.db_session)
+        remove_option('throttler', '%s,%s' % (self.user_activity, self.dest_rse_id), session=self.db_session)
+        remove_option('throttler', '%s,%s' % (self.all_activities, self.dest_rse_id), session=self.db_session)
         self.db_session.commit()
 
     @classmethod
@@ -170,7 +170,7 @@ class TestThrottlerGroupedFIFO(object):
 
         # four waiting requests and one active requests but threshold is 1
         # more than 80% of the transfer limit are already used -> release nothing
-        set('throttler', '%s,%s' % (self.all_activities, self.dest_rse), 1, session=self.db_session)
+        set('throttler', '%s,%s' % (self.all_activities, self.dest_rse_id), 1, session=self.db_session)
         request = models.Request(dest_rse_id=self.dest_rse_id, bytes=2, activity=self.user_activity, state=constants.RequestState.SUBMITTED)
         request.save(session=self.db_session)
         name1 = generate_uuid()
@@ -273,7 +273,7 @@ class TestThrottlerGroupedFIFO(object):
             return True
 
         set_rse_transfer_limits(self.dest_rse_id, self.all_activities, volume=10, max_transfers=1, session=self.db_session)
-        set('throttler', '%s,%s' % (self.all_activities, self.dest_rse), 1, session=self.db_session)  # threshold used by throttler
+        set('throttler', '%s,%s' % (self.all_activities, self.dest_rse_id), 1, session=self.db_session)  # threshold used by throttler
         name1 = generate_uuid()
         name2 = generate_uuid()
         name3 = generate_uuid()
@@ -395,8 +395,8 @@ class TestThrottlerFIFO(object):
 
     def setUp(self):
         self.db_session.query(models.Request).delete()
-        remove_option('throttler', '%s,%s' % (self.user_activity, self.dest_rse), session=self.db_session)
-        remove_option('throttler', '%s,%s' % (self.all_activities, self.dest_rse), session=self.db_session)
+        remove_option('throttler', '%s,%s' % (self.user_activity, self.dest_rse_id), session=self.db_session)
+        remove_option('throttler', '%s,%s' % (self.all_activities, self.dest_rse_id), session=self.db_session)
         self.db_session.commit()
 
     @classmethod
@@ -459,7 +459,7 @@ class TestThrottlerFIFO(object):
         self.db_session.commit()
         name1 = generate_uuid()
         add_replica(self.source_rse_id, self.scope, name1, 1, self.account, session=self.db_session)
-        set('throttler', '%s,%s' % (self.user_activity, self.dest_rse), 3, session=self.db_session)
+        set('throttler', '%s,%s' % (self.user_activity, self.dest_rse_id), 3, session=self.db_session)
         request = models.Request(dest_rse_id=self.dest_rse_id, activity=self.user_activity, state=constants.RequestState.SUBMITTED)
         request.save(session=self.db_session)
         requests = [{
@@ -490,7 +490,7 @@ class TestThrottlerFIFO(object):
         """ THROTTLER (CLIENTS): throttler release nothing (fifo). """
         # two waiting requests and one active requests but threshold is 1
         # more than 80% of the transfer limit are already used -> release nothing
-        set('throttler', '%s,%s' % (self.user_activity, self.dest_rse), 1, session=self.db_session)
+        set('throttler', '%s,%s' % (self.user_activity, self.dest_rse_id), 1, session=self.db_session)
         request = models.Request(dest_rse_id=self.dest_rse_id, bytes=2, activity=self.user_activity, state=constants.RequestState.SUBMITTED)
         request.save(session=self.db_session)
         name1 = generate_uuid()
@@ -543,7 +543,7 @@ class TestThrottlerFIFO(object):
     def test_throttler_fifo_release_subset(self):
         """ THROTTLER (CLIENTS): throttler release subset of waiting requests (fifo). """
         # two waiting requests and no active requests but threshold is 1 -> release only 1 request
-        set('throttler', '%s,%s' % (self.user_activity, self.dest_rse), 1, session=self.db_session)
+        set('throttler', '%s,%s' % (self.user_activity, self.dest_rse_id), 1, session=self.db_session)
         name1 = generate_uuid()
         name2 = generate_uuid()
         add_replica(self.source_rse_id, self.scope, name1, 1, self.account, session=self.db_session)

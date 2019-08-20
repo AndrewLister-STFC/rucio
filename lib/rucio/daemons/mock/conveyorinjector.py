@@ -36,7 +36,7 @@ import traceback
 
 import requests
 
-from rucio.common.config import config_get, config_get_int
+from rucio.common.config import config_get, config_get_bool, config_get_int
 from rucio.common.types import InternalAccount, InternalScope
 from rucio.common.utils import generate_uuid
 from rucio.core import account_limit, did, rse, replica, rule
@@ -57,6 +57,8 @@ logging.basicConfig(stream=sys.stdout,
 
 graceful_stop = threading.Event()
 
+vo = {'vo': 'tst'} if config_get_bool('common', 'multi_vo', raise_exception=False, default=False) else {}
+
 
 def generate_rse(endpoint, token):
 
@@ -75,7 +77,7 @@ def generate_rse(endpoint, token):
             'lan': {'read': 1, 'write': 1, 'delete': 1},
             'wan': {'read': 1, 'write': 1, 'delete': 1}}}
 
-    rse_id = rse.add_rse(rse_name, vo='def')
+    rse_id = rse.add_rse(rse_name, **vo)
     tmp_proto['hostname'] = endpoint.split(':')[1][2:]
     tmp_proto['port'] = endpoint.split(':')[2].split('/')[0]
     tmp_proto['prefix'] = '/'.join([''] + endpoint.split(':')[2].split('/')[1:])
@@ -85,7 +87,7 @@ def generate_rse(endpoint, token):
     rse.add_protocol(rse_id=rse_id, parameter=tmp_proto)
     rse.add_rse_attribute(rse_id=rse_id, key='fts', value='https://fts3-pilot.cern.ch:8446')
 
-    account_limit.set_account_limit(account=InternalAccount('root', vo='def'), rse_id=rse_id, bytes=-1)
+    account_limit.set_account_limit(account=InternalAccount('root', **vo), rse_id=rse_id, bytes=-1)
 
     return rsemanager.get_rse_info(rse_id=rse_id)
 
@@ -121,8 +123,8 @@ def request_transfer(loop=1, src=None, dst=None,
             tmp_name = generate_uuid()
 
             # add a new dataset
-            scope = InternalScope('mock')
-            account = InternalAccount('root')
+            scope = InternalScope('mock', **vo)
+            account = InternalAccount('root', **vo)
             did.add_did(scope=scope, name='dataset-%s' % tmp_name,
                         type=DIDType.DATASET, account=account, session=session)
 

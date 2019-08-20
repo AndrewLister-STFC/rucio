@@ -31,6 +31,7 @@ import tempfile
 
 from rucio.client.accountclient import AccountClient
 from rucio.common import exception
+from rucio.common.config import config_get_bool
 from rucio.common.utils import generate_uuid as uuid
 
 
