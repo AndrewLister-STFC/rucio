@@ -7,6 +7,7 @@
 #
 # Authors:
 # - Tomas Javor Javurek, <tomas.javurek@cern.ch>, 2019
+# - Andrew Lister <andrew.lister@stfc.ac.uk>, 2019
 
 
 import os

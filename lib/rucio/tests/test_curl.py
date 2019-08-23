@@ -9,6 +9,7 @@
   - Vincent Garonne, <vincent.garonne@cern.ch>, 2012-2017
   - Mario Lassnig, <mario.lassnig@cern.ch>, 2012, 2014
   - Joaquin Bogado, <jbogado@linti.unlp.edu.ar>, 2018
+  - Andrew Lister, <andrew.lister@stfc.ac.uk>, 2019
 
   How to generate test outputs/Test the API via CURL:
     nosetests --verbose --with-outputsave --save-directory=doc/source/example_outputs/ lib/rucio/tests/test_curl.py
